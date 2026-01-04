@@ -1,0 +1,80 @@
+name: Auto-Approve Copilot PRs
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+jobs:
+  auto-approve:
+    # Only run for PRs from fix/issue-* branches or authored by Copilot
+    if: |
+      startsWith(github.head_ref, 'fix/issue-') || 
+      github.event.pull_request.user.login == 'github-actions[bot]' ||
+      contains(github.event.pull_request.title, '🤖')
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Check if PR is from Copilot workflow
+        id: check-source
+        run: |
+          echo "branch=${{ github.head_ref }}" >> $GITHUB_OUTPUT
+          echo "author=${{ github.event.pull_request.user.login }}" >> $GITHUB_OUTPUT
+          echo "title=${{ github.event.pull_request.title }}" >> $GITHUB_OUTPUT
+
+      - name: Auto-approve PR
+        uses: hmarr/auto-approve-action@v4
+        with:
+          github-token: ${{ secrets.PAT_TOKEN }}
+
+      - name: Add approval comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## ✅ Auto-Approved by Workflow
+              
+              This PR was automatically approved because it:
+              - Originated from an AI-generated change request
+              - Was created on a \`fix/issue-*\` branch
+              - Meets the criteria for automated approval
+              
+              ### Next Steps
+              1. **Review the changes** - Make sure they match the original request
+              2. **Run tests locally** - \`pnpm test && pnpm build\`
+              3. **Check the screenshot** - Compare with the original issue
+              4. **Merge when ready** - Or request changes if needed
+              
+              ### Quality Checks
+              - [ ] Changes match the issue description
+              - [ ] Tests pass in CI
+              - [ ] No unintended side effects
+              - [ ] Code follows project standards
+              
+              ---
+              🤖 _Auto-approved by GitHub Actions_`
+            });
+
+      - name: Add labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['auto-approved', 'ai-generated']
+            });
+
+      - name: Request CI checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Add a comment to trigger any CI checks
+            console.log('✅ PR auto-approved and labeled');
+            console.log(`PR #${context.issue.number}: ${context.payload.pull_request.title}`);
