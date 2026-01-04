@@ -1,0 +1,145 @@
+name: Link PR Preview Issues
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  link-to-pr:
+    # Only run for issues with pr-preview-feedback label
+    if: contains(github.event.issue.labels.*.name, 'pr-preview-feedback')
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Extract PR number from issue
+        id: extract-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+            const body = issue.body || '';
+
+            // Look for "Related PR: #123" in the issue body
+            const prMatch = body.match(/\*\*Related PR:\*\*\s*#(\d+)/);
+
+            if (prMatch) {
+              const prNumber = parseInt(prMatch[1], 10);
+              core.setOutput('pr_number', prNumber);
+              console.log(`Found related PR: #${prNumber}`);
+              return prNumber;
+            } else {
+              console.log('No related PR found in issue body');
+              return null;
+            }
+
+      - name: Comment on PR with issue link
+        if: steps.extract-pr.outputs.pr_number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.extract-pr.outputs.pr_number }};
+            const issue = context.payload.issue;
+
+            // Check if this PR exists
+            let pr;
+            try {
+              const prResponse = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+              pr = prResponse.data;
+            } catch (error) {
+              console.log(`PR #${prNumber} not found:`, error.message);
+              return;
+            }
+
+            // Extract preview information from issue
+            const body = issue.body || '';
+            const screenshotMatch = body.match(/!\[Screenshot\]\((https:\/\/[^\)]+)\)/);
+            const screenshotUrl = screenshotMatch ? screenshotMatch[1] : null;
+
+            const selectorMatch = body.match(/\*\*Element Selector:\*\*\s*`([^`]+)`/);
+            const selector = selectorMatch ? selectorMatch[1] : 'Not specified';
+
+            // Comment on the PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 💬 Feedback from PR Preview
+
+            A new issue was created while reviewing the preview of this PR:
+
+            ### 🐛 Issue #${issue.number}: ${issue.title}
+
+            ${issue.body.split('### Expected Change')[1]?.split('###')[0]?.trim() || issue.title}
+
+            **Element:** \`${selector}\`
+
+            ${screenshotUrl ? `**Screenshot:**\n![Preview Feedback](${screenshotUrl})` : ''}
+
+            ---
+
+            **Full details:** ${issue.html_url}
+
+            This feedback can be addressed in this PR or tracked separately.`
+            });
+
+            console.log(`✅ Commented on PR #${prNumber} about issue #${issue.number}`);
+
+      - name: Add PR reference to issue
+        if: steps.extract-pr.outputs.pr_number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.extract-pr.outputs.pr_number }};
+            const issue = context.payload.issue;
+
+            // Add a comment linking back to the PR
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: issue.number,
+              body: `### 🔗 Linked to PR #${prNumber}
+
+            This issue was created while reviewing the preview deployment of PR #${prNumber}.
+
+            A comment has been added to that PR with this feedback.
+
+            **Options:**
+            - Address this feedback in PR #${prNumber} before merging
+            - Track separately and implement later
+            - Close if not applicable
+
+            ---
+
+            🤖 _Automated by PR Preview Feedback Workflow_`
+            });
+
+            console.log(`✅ Added PR reference comment to issue #${issue.number}`);
+
+      - name: Add reaction to issue
+        if: steps.extract-pr.outputs.pr_number
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.reactions.createForIssue({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              content: 'link'
+            });
+
+            console.log('✅ Added link reaction to issue');
+
+      - name: Log completion
+        if: steps.extract-pr.outputs.pr_number
+        run: |
+          echo "✅ Successfully linked issue #${{ github.event.issue.number }} to PR #${{ steps.extract-pr.outputs.pr_number }}"
+          echo "📋 Issue URL: ${{ github.event.issue.html_url }}"

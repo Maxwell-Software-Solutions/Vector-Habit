@@ -1,0 +1,11 @@
+import { prisma } from '@/lib/db';
+
+export const {{camelCase name}}Resolver = {
+  {{type}}: {
+    {{camelCase name}}: async (_parent: any, args: any, context: any) => {
+      // Implement resolver logic
+      // Example: return await prisma.model.findMany();
+      throw new Error('Not implemented');
+    },
+  },
+};
