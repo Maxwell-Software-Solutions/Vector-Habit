@@ -1,0 +1,29 @@
+import { test, expect } from '@playwright/test';
+
+test.describe('{{pascalCase name}}', () => {
+  test('should load page successfully', async ({ page }) => {
+    await page.goto('/{{kebabCase name}}');
+    
+    // Take screenshot for visual feedback
+    await page.screenshot({ path: 'tests/e2e/screenshots/{{kebabCase name}}.png' });
+    
+    // Add assertions
+    await expect(page).toHaveTitle(/{{pascalCase name}}/);
+  });
+
+  test('should meet performance budgets', async ({ page }) => {
+    await page.goto('/{{kebabCase name}}');
+    
+    // Lighthouse will validate Core Web Vitals in CI
+    // This test ensures page loads without errors
+    await expect(page.locator('body')).toBeVisible();
+  });
+
+  test('should be accessible', async ({ page }) => {
+    await page.goto('/{{kebabCase name}}');
+    
+    // Basic accessibility checks
+    const mainContent = page.locator('main');
+    await expect(mainContent).toBeVisible();
+  });
+});

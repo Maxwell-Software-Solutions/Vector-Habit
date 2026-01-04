@@ -1,0 +1,16 @@
+{{#if (eq type 'client')}}'use client';
+
+{{/if}}import React from 'react';
+
+interface {{pascalCase name}}Props {
+  // Add your props here
+}
+
+export function {{pascalCase name}}({}: {{pascalCase name}}Props) {
+  return (
+    <div className="{{kebabCase name}}">
+      <h2>{{pascalCase name}}</h2>
+      {/* Component content */}
+    </div>
+  );
+}

@@ -1,0 +1,316 @@
+name: Route AI Change Requests
+
+on:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  notify-copilot:
+    # Only run when ai-change-request label is present
+    if: contains(github.event.issue.labels.*.name, 'ai-change-request')
+    runs-on: ubuntu-latest
+
+    permissions:
+      issues: write
+      contents: read
+
+    steps:
+      - name: Comment with Copilot instructions
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.issue.number }}
+          body: |
+            ## 🤖 GitHub Copilot - Please Implement
+
+            @github-copilot This is an AI-generated change request. Please:
+
+            1. **Review** the Expected Change and Screenshot above
+            2. **Locate** the component using the provided selector
+            3. **Implement** the changes according to acceptance criteria
+            4. **Test** locally (ensure no regressions)
+            5. **Open a PR** linking back to this issue (use `Fixes #${{ github.event.issue.number }}`)
+
+            ### Implementation Notes
+            - Use the selector hint: check for `data-ai-id` attributes first
+            - If screenshot shows layout, preserve spacing and alignment
+            - Run existing tests before submitting PR
+            - Consider mobile/responsive implications
+
+            ### When Done
+            - Link PR to this issue
+            - Add screenshots/preview to PR description
+            - Request review from original requester if possible
+
+            ---
+
+            _Automated by Inline AI Workflow_
+
+      - name: Add metadata labels
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['copilot-ready', 'enhancement']
+            });
+
+      - name: Log to Actions
+        run: |
+          echo "✅ Notified Copilot for issue #${{ github.event.issue.number }}"
+          echo "📋 Issue URL: ${{ github.event.issue.html_url }}"
+
+  create-implementation-pr:
+    # Create a branch and draft PR automatically for Copilot to implement
+    if: contains(github.event.issue.labels.*.name, 'ai-change-request')
+    runs-on: ubuntu-latest
+    needs: notify-copilot
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Create implementation branch
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git checkout -b "fix/issue-${{ github.event.issue.number }}"
+
+          # Create an empty commit to enable PR creation
+          git commit --allow-empty -m "🤖 Initialize branch for issue #${{ github.event.issue.number }}"
+          git push -u origin "fix/issue-${{ github.event.issue.number }}"
+
+      - name: Extract issue details
+        id: issue-details
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const issue = context.payload.issue;
+
+            // Extract key sections from issue body
+            const body = issue.body || '';
+
+            // Find the element selector
+            const selectorMatch = body.match(/\*\*Element Selector:\*\*\s*`([^`]+)`/);
+            const selector = selectorMatch ? selectorMatch[1] : 'Not specified';
+
+            // Find expected change
+            const changeMatch = body.match(/### Expected Change\s*\n\s*\n(.+?)(?=\n\n###|\n\n\*\*|$)/s);
+            const expectedChange = changeMatch ? changeMatch[1].trim() : 'See issue description';
+
+            core.setOutput('selector', selector);
+            core.setOutput('expectedChange', expectedChange);
+            return { selector, expectedChange };
+
+      - name: Create Draft PR
+        id: create-pr
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const branchName = `fix/issue-${{ github.event.issue.number }}`;
+            const issue = context.payload.issue;
+
+            const prBody = `## 🤖 AI-Generated Change Request
+
+            Fixes #${{ github.event.issue.number }}
+
+            ### 📋 Task Summary
+            ${issue.title}
+
+            ### 🎯 Expected Change
+            ${{ steps.issue-details.outputs.expectedChange }}
+
+            ### 🔍 Element Selector
+            \`\`\`
+            ${{ steps.issue-details.outputs.selector }}
+            \`\`\`
+
+            ### ✅ Implementation Checklist
+            - [ ] Located the component using the selector above
+            - [ ] Implemented the requested changes
+            - [ ] Verified changes match the screenshot in the issue
+            - [ ] All existing tests pass (\`pnpm test\`)
+            - [ ] Build succeeds (\`pnpm build\`)
+            - [ ] No console errors or warnings
+            - [ ] Responsive behavior verified
+            - [ ] Added/updated tests if needed
+
+            ### 🤖 How to Implement with Copilot
+
+            #### Option 1: VS Code Copilot Chat
+            \`\`\`bash
+            git fetch origin
+            git checkout ${branchName}
+            \`\`\`
+
+            Then in Copilot Chat:
+            \`\`\`
+            @workspace Review issue #${{ github.event.issue.number }} and implement the requested changes. 
+            Use the element selector provided and match the expected behavior from the screenshot.
+            \`\`\`
+
+            #### Option 2: GitHub Copilot Workspace
+            [Open in Copilot Workspace](https://copilot-workspace.githubnext.com/${context.repo.owner}/${context.repo.repo}/issues/${{ github.event.issue.number }})
+
+            ---
+
+            🤖 _This PR was automatically created by the Inline AI Workflow_
+            📸 _Review the original screenshot and details in issue #${{ github.event.issue.number }}_
+            `;
+
+            const pr = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🤖 ${issue.title}`,
+              head: branchName,
+              base: 'main',
+              body: prBody,
+              draft: true
+            });
+
+            core.setOutput('pr_number', pr.data.number);
+            core.setOutput('pr_url', pr.data.html_url);
+
+            return pr.data.number;
+
+      - name: Add labels and assignees to PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.create-pr.outputs.pr_number }};
+
+            // Add labels
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              labels: ['ai-generated', 'copilot-ready', 'enhancement']
+            });
+
+            // Assign PR to the repository owner for oversight
+            const assignees = [context.repo.owner];
+
+            // Also assign the issue creator if different from owner
+            if (context.payload.issue.user.login !== context.repo.owner) {
+              assignees.push(context.payload.issue.user.login);
+            }
+
+            try {
+              await github.rest.issues.addAssignees({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: prNumber,
+                assignees: assignees
+              });
+              console.log(`✅ Assigned PR to: ${assignees.join(', ')}`);
+            } catch (error) {
+              console.log('ℹ️  Could not assign PR:', error.message);
+            }
+
+            // Request review from GitHub Copilot and repository maintainers
+            try {
+              const reviewers = [context.repo.owner];
+              
+              // Add Copilot as a reviewer (GitHub's special copilot reviewer)
+              reviewers.push('copilot');
+              
+              await github.rest.pulls.requestReviewers({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                reviewers: reviewers
+              });
+              console.log(`✅ Requested review from: ${reviewers.join(', ')}`);
+            } catch (error) {
+              console.log('ℹ️  Could not request review:', error.message);
+              
+              // If adding copilot fails, try without it
+              try {
+                await github.rest.pulls.requestReviewers({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  reviewers: [context.repo.owner]
+                });
+                console.log(`✅ Requested review from @${context.repo.owner} (copilot not available)`);
+              } catch (fallbackError) {
+                console.log('ℹ️  Fallback review request also failed:', fallbackError.message);
+              }
+            }
+
+      - name: Trigger Copilot on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const prNumber = ${{ steps.create-pr.outputs.pr_number }};
+
+            // Comment on the PR to trigger GitHub Copilot
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: prNumber,
+              body: `## 🤖 GitHub Copilot - Ready for Implementation
+
+            @github-copilot This PR is ready for you to implement!
+
+            ### 📋 Your Task
+            Please review the linked issue #${{ github.event.issue.number }} and implement the requested changes.
+
+            ### 🎯 What to do:
+            1. Read the **Expected Change** section in the issue
+            2. Use the **Element Selector** to find the right component
+            3. Review the **Screenshot** to understand the desired outcome
+            4. Implement the changes following the **Acceptance Criteria**
+            5. Run \`pnpm test\` and \`pnpm build\` to ensure everything works
+            6. Mark this PR as **Ready for Review** when complete
+
+            ### 🔍 Key Information
+            - Element Selector: \`${{ steps.issue-details.outputs.selector }}\`
+            - Expected Change: ${{ steps.issue-details.outputs.expectedChange }}
+
+            ---
+
+            💡 **Tip for developers**: You can also checkout this branch locally and use Copilot Chat:
+            \`\`\`bash
+            git fetch origin
+            git checkout fix/issue-${{ github.event.issue.number }}
+            \`\`\`
+
+            Then in VS Code Copilot Chat:
+            \`\`\`
+            @workspace Review issue #${{ github.event.issue.number }} and implement the requested changes
+            \`\`\`
+
+            ---
+            🤖 _Automated by Inline AI Workflow_`
+            });
+
+      - name: Comment on original issue with PR link
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `### 🚀 Draft PR Created
+
+            A draft pull request has been automatically created: **PR #${{ steps.create-pr.outputs.pr_number }}**
+
+            🔗 **[View Pull Request](${{ steps.create-pr.outputs.pr_url }})**
+
+            ### Next Steps
+
+            1. **Use GitHub Copilot** to implement the changes (see PR description)
+            2. **Review and test** the implementation locally
+            3. **Mark PR as ready** when complete
+            4. **Merge** after approval
+
+            The PR is currently in **draft mode** and ready for Copilot to work on it! 🤖`
+            });
