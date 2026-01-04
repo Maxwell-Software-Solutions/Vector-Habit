@@ -1,0 +1,22 @@
+import { render, screen } from '@testing-library/react';
+import { {{pascalCase name}} } from './{{pascalCase name}}';
+
+describe('{{pascalCase name}}', () => {
+  it('renders without crashing', () => {
+    render(<{{pascalCase name}} />);
+    expect(screen.getByText('{{pascalCase name}}')).toBeInTheDocument();
+  });
+
+  it('has correct className', () => {
+    const { container } = render(<{{pascalCase name}} />);
+    expect(container.firstChild).toHaveClass('{{kebabCase name}}');
+  });
+
+  // Add more tests to meet 95% coverage requirement
+  it('renders with proper structure', () => {
+    const { container } = render(<{{pascalCase name}} />);
+    const heading = container.querySelector('h2');
+    expect(heading).toBeInTheDocument();
+    expect(heading).toHaveTextContent('{{pascalCase name}}');
+  });
+});
