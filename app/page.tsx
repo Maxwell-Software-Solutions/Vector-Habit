@@ -1,5 +1,7 @@
 import Image from 'next/image';
-import { FloorPlanViewer } from '@/components/FloorPlanViewer';
+import { FloorPlanEditor } from '@/components/FloorPlanEditor';
+import { Toolbar } from '@/components/Toolbar';
+import { PropertiesPanel } from '@/components/PropertiesPanel';
 import simpleRoomJson from '@/public/examples/simple-room.json';
 import type { Project } from '@/lib/ir/schema';
 
@@ -9,7 +11,7 @@ export default function Home() {
 
   return (
     <main className="flex flex-col items-center justify-center p-8">
-      <div className="z-10 max-w-6xl w-full">
+      <div className="z-10 max-w-7xl w-full">
         <div className="flex items-center justify-center gap-3 mb-8">
           <Image
             src="/vercel-triangle.svg"
@@ -23,13 +25,21 @@ export default function Home() {
         </div>
 
         <p className="text-center text-lg mb-2 text-gray-700">AI-Driven Floor Plan Design Tool</p>
-        <p className="text-center text-sm mb-8 text-gray-500">
-          Stage 2: Canvas Viewer Prototype - Read-only visualization
+        <p className="text-center text-sm mb-4 text-gray-500">
+          Stage 3: Interactive Editor - Draw walls, add openings, undo/redo
         </p>
 
-        {/* Floor Plan Viewer */}
-        <div className="mb-8 relative">
-          <FloorPlanViewer project={exampleProject} width={1000} height={700} />
+        {/* Toolbar */}
+        <div className="mb-4 flex justify-center">
+          <Toolbar />
+        </div>
+
+        {/* Floor Plan Editor + Properties Panel */}
+        <div className="flex gap-4 items-start justify-center mb-8">
+          <div className="relative">
+            <FloorPlanEditor project={exampleProject} width={1000} height={700} />
+          </div>
+          <PropertiesPanel />
         </div>
 
         {/* Project Info */}
@@ -53,22 +63,25 @@ export default function Home() {
           </div>
 
           <div className="p-6 gradient-border">
-            <h2 className="text-xl font-semibold mb-2">✅ Stage 1 Complete</h2>
+            <h2 className="text-xl font-semibold mb-2">✅ Stage 2 Complete</h2>
             <ul className="text-sm space-y-1">
-              <li>✓ IR Schema (Zod)</li>
-              <li>✓ Validation Engine</li>
-              <li>✓ 100% Test Coverage</li>
-              <li>✓ Rating: 9.5/10</li>
+              <li>✓ Canvas Rendering</li>
+              <li>✓ Pan & Zoom Controls</li>
+              <li>✓ 97.69% Test Coverage</li>
+              <li>✓ Rating: 9.0/10</li>
             </ul>
           </div>
 
           <div className="p-6 gradient-border">
-            <h2 className="text-xl font-semibold mb-2">🎨 Stage 2 Features</h2>
+            <h2 className="text-xl font-semibold mb-2">🎨 Stage 3 Features</h2>
             <ul className="text-sm space-y-1">
-              <li>✓ Konva.js Canvas</li>
-              <li>✓ Geometry Derivation</li>
-              <li>✓ Pan/Zoom Controls</li>
-              <li>✓ Wall & Opening Rendering</li>
+              <li>✓ Interactive Editor</li>
+              <li>✓ Draw Walls Tool</li>
+              <li>✓ Add Doors/Windows</li>
+              <li>✓ Select & Properties</li>
+              <li>✓ Undo/Redo (Ctrl+Z)</li>
+              <li>✓ Delete Elements</li>
+              <li>✓ Grid Snapping (1m)</li>
             </ul>
           </div>
         </div>

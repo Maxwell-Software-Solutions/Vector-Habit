@@ -63,6 +63,9 @@ This command runs sequentially:
 ### Individual Test Suites
 
 ```bash
+# Runtime error checking
+pnpm check:runtime         # Automated dev server runtime check
+
 # Unit tests (Jest)
 pnpm test:unit              # Run with coverage
 pnpm test:unit:watch        # Watch mode

@@ -9,27 +9,31 @@ import { FloorPlanViewer } from './FloorPlanViewer';
 import type { Project } from '@/lib/ir/schema';
 
 const mockProject: Project = {
+  id: 'p1',
   name: 'Test Project',
+  units: 'mm' as const,
   levels: [
     {
-      id: 'level-1',
+      id: 'l1',
       name: 'Ground Floor',
-      elevationMm: 0,
       walls: [
         {
-          id: 'wall-1',
+          id: 'w1',
           a: { x: 0, y: 0 },
           b: { x: 5000, y: 0 },
           thicknessMm: 200,
+          heightMm: 2700,
         },
       ],
       openings: [
         {
-          id: 'opening-1',
+          id: 'o1',
           type: 'door',
-          wallId: 'wall-1',
+          wallId: 'w1',
           offsetMm: 2000,
           widthMm: 900,
+          heightMm: 2100,
+          sillHeightMm: 0,
         },
       ],
     },
@@ -83,9 +87,8 @@ describe('FloorPlanViewer', () => {
       levels: [
         mockProject.levels[0],
         {
-          id: 'level-2',
+          id: 'l2',
           name: 'First Floor',
-          elevationMm: 3000,
           walls: [],
           openings: [],
         },
@@ -104,15 +107,15 @@ describe('FloorPlanViewer', () => {
       levels: [
         mockProject.levels[0],
         {
-          id: 'level-2',
+          id: 'l2',
           name: 'First Floor',
-          elevationMm: 3000,
           walls: [
             {
-              id: 'wall-2',
+              id: 'w2',
               a: { x: 0, y: 0 },
               b: { x: 3000, y: 0 },
               thicknessMm: 200,
+              heightMm: 2700,
             },
           ],
           openings: [],

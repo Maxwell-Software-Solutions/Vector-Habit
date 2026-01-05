@@ -17,6 +17,7 @@
     "update:check": "pnpm outdated && pnpm audit",
     "update:interactive": "pnpm update --interactive --latest",
     "check:deps": "node scripts/check-peer-deps.js",
+    "check:runtime": "node scripts/check-runtime.js",
     "check:all": "pnpm type-check && pnpm check:deps && pnpm lint",
     "test": "turbo run test",
     "test:all": "pnpm test:unit && pnpm test:e2e",
@@ -44,6 +45,7 @@
     "@apollo/server": "^5.0.0",
     "@as-integrations/next": "^4.0.0",
     "@octokit/rest": "^22.0.0",
+    "@paralleldrive/cuid2": "^3.0.6",
     "@prisma/client": "^6.18.0",
     "@radix-ui/react-slot": "^1.2.3",
     "@vercel/blob": "^2.0.0",
@@ -60,7 +62,8 @@
     "react-konva": "^18.2.10",
     "tailwind-merge": "^3.3.1",
     "tailwindcss-animate": "^1.0.7",
-    "zod": "^4.1.12"
+    "zod": "^4.1.12",
+    "zustand": "^5.0.9"
   },
   "devDependencies": {
     "@lhci/cli": "^0.13.0",

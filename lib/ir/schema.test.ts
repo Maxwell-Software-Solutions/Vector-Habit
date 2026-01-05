@@ -421,11 +421,16 @@ describe('IR Schema', () => {
     it('should create valid ISO 8601 timestamps', () => {
       const project = createEmptyProject('Test');
 
-      const createdDate = new Date(project.createdAt);
-      const updatedDate = new Date(project.updatedAt);
+      expect(project.createdAt).toBeDefined();
+      expect(project.updatedAt).toBeDefined();
 
-      expect(createdDate.toISOString()).toBe(project.createdAt);
-      expect(updatedDate.toISOString()).toBe(project.updatedAt);
+      if (project.createdAt && project.updatedAt) {
+        const createdDate = new Date(project.createdAt);
+        const updatedDate = new Date(project.updatedAt);
+
+        expect(createdDate.toISOString()).toBe(project.createdAt);
+        expect(updatedDate.toISOString()).toBe(project.updatedAt);
+      }
     });
 
     it('should create project that passes schema validation', () => {
@@ -499,7 +504,8 @@ describe('IR Schema', () => {
       const result = safeValidateProjectSchema(validData);
 
       expect(result.success).toBe(true);
-      if (result.success) {
+      expect(result.data).toBeDefined();
+      if (result.data) {
         expect(result.data.id).toBe('p1');
       }
     });
@@ -548,7 +554,8 @@ describe('IR Schema', () => {
       const result = safeValidateProjectSchema(invalidData);
 
       expect(result.success).toBe(false);
-      if (!result.success) {
+      expect(result.error).toBeDefined();
+      if (result.error) {
         expect(result.error.issues.length).toBeGreaterThan(0);
         expect(result.error.issues[0].path).toContain('units');
       }
