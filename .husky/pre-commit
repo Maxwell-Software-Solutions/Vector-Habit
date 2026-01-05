@@ -1,1 +1,1 @@
-pnpm lint && pnpm test:unit
+pnpm check:deps && pnpm lint && pnpm test:unit

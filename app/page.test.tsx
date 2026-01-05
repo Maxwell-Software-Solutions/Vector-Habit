@@ -4,47 +4,50 @@ import Page from './page';
 describe('Home Page', () => {
   it('renders the main heading', () => {
     render(<Page />);
-    const heading = screen.getByText(/Vercel Spine/i);
+    const heading = screen.getByText(/FloorForge/i);
     expect(heading).toBeInTheDocument();
   });
 
-  it('renders the Vercel triangle', () => {
+  it('renders the logo', () => {
     render(<Page />);
-    const triangle = screen.getByAltText(/Vercel Triangle/i);
-    expect(triangle).toBeInTheDocument();
-    expect(triangle).toHaveAttribute('src', '/vercel-triangle.svg');
+    const logo = screen.getByAltText(/FloorForge Logo/i);
+    expect(logo).toBeInTheDocument();
+    expect(logo).toHaveAttribute('src', '/vercel-triangle.svg');
   });
 
   it('renders the subtitle', () => {
     render(<Page />);
-    expect(screen.getByText(/Next.js Full-Stack Template/i)).toBeInTheDocument();
+    expect(screen.getByText(/AI-Driven Floor Plan Design Tool/i)).toBeInTheDocument();
+    expect(screen.getByText(/Stage 2: Canvas Viewer Prototype/i)).toBeInTheDocument();
   });
 
-  it('renders the Features section', () => {
+  it('renders the FloorPlanViewer canvas', () => {
     render(<Page />);
-    expect(screen.getByText(/🚀 Features/i)).toBeInTheDocument();
-    expect(screen.getByText(/Next.js 14 App Router/i)).toBeInTheDocument();
-    expect(screen.getByText(/TypeScript/i)).toBeInTheDocument();
-    expect(screen.getByText(/Tailwind CSS/i)).toBeInTheDocument();
-    expect(screen.getByText(/GraphQL with Apollo/i)).toBeInTheDocument();
+    expect(screen.getByTestId('konva-stage')).toBeInTheDocument();
   });
 
-  it('renders the Testing section', () => {
+  it('renders the Project section', () => {
     render(<Page />);
-    expect(screen.getByText(/✅ Testing/i)).toBeInTheDocument();
-    expect(screen.getByText(/Jest \(95% coverage\)/i)).toBeInTheDocument();
-    expect(screen.getByText(/Playwright E2E/i)).toBeInTheDocument();
-    expect(screen.getByText(/Lighthouse CI/i)).toBeInTheDocument();
-    expect(screen.getByText(/Unified test command/i)).toBeInTheDocument();
+    expect(screen.getByText(/📐 Project/i)).toBeInTheDocument();
+    expect(screen.getByText(/Simple Rectangular Room/i)).toBeInTheDocument();
+    expect(screen.getByText(/Levels:/i)).toBeInTheDocument();
+    expect(screen.getByText(/Walls:/i)).toBeInTheDocument();
   });
 
-  it('renders the Tools section', () => {
+  it('renders the Stage 1 Complete section', () => {
     render(<Page />);
-    expect(screen.getByText(/🛠️ Tools/i)).toBeInTheDocument();
-    expect(screen.getByText(/Prisma ORM/i)).toBeInTheDocument();
-    expect(screen.getByText(/NextAuth.js/i)).toBeInTheDocument();
-    expect(screen.getByText(/Plop.js generators/i)).toBeInTheDocument();
-    expect(screen.getByText(/TurboRepo/i)).toBeInTheDocument();
+    expect(screen.getByText(/✅ Stage 1 Complete/i)).toBeInTheDocument();
+    expect(screen.getByText(/IR Schema/i)).toBeInTheDocument();
+    expect(screen.getByText(/Validation Engine/i)).toBeInTheDocument();
+    expect(screen.getByText(/100% Test Coverage/i)).toBeInTheDocument();
+  });
+
+  it('renders the Stage 2 Features section', () => {
+    render(<Page />);
+    expect(screen.getByText(/🎨 Stage 2 Features/i)).toBeInTheDocument();
+    expect(screen.getByText(/Konva.js Canvas/i)).toBeInTheDocument();
+    expect(screen.getByText(/Geometry Derivation/i)).toBeInTheDocument();
+    expect(screen.getByText(/Pan\/Zoom Controls/i)).toBeInTheDocument();
   });
 
   it('applies gradient-border class to feature cards', () => {

@@ -33,6 +33,9 @@ const config: Config = {
   },
   moduleNameMapper: {
     '^@/(.*)$': '<rootDir>/$1',
+    // Mock Konva and react-konva (canvas library, not needed in Jest)
+    '^konva$': '<rootDir>/__mocks__/konva.ts',
+    '^react-konva$': '<rootDir>/__mocks__/react-konva.tsx',
   },
   transformIgnorePatterns: ['node_modules/(?!(@apollo|@wry)/)'],
   testMatch: ['**/__tests__/**/*.[jt]s?(x)', '**/?(*.)+(spec|test).[jt]s?(x)'],
