@@ -1,0 +1,33 @@
+{
+  "id": "p2",
+  "name": "Invalid Plan (Opening Exceeds Wall)",
+  "units": "mm",
+  "levels": [
+    {
+      "id": "l1",
+      "name": "Ground Floor",
+      "walls": [
+        {
+          "id": "w1",
+          "a": { "x": 0, "y": 0 },
+          "b": { "x": 2000, "y": 0 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        }
+      ],
+      "openings": [
+        {
+          "id": "o1",
+          "wallId": "w1",
+          "type": "door",
+          "offsetMm": 1500,
+          "widthMm": 1200,
+          "heightMm": 2100,
+          "sillHeightMm": 0
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-01-05T10:00:00Z",
+  "updatedAt": "2026-01-05T10:00:00Z"
+}

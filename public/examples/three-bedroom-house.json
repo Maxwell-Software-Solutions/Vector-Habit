@@ -1,0 +1,137 @@
+{
+  "id": "p3",
+  "name": "Three Bedroom House",
+  "units": "mm",
+  "levels": [
+    {
+      "id": "l1",
+      "name": "Ground Floor",
+      "walls": [
+        {
+          "id": "w1",
+          "a": { "x": 0, "y": 0 },
+          "b": { "x": 12000, "y": 0 },
+          "thicknessMm": 250,
+          "heightMm": 2700
+        },
+        {
+          "id": "w2",
+          "a": { "x": 12000, "y": 0 },
+          "b": { "x": 12000, "y": 9000 },
+          "thicknessMm": 250,
+          "heightMm": 2700
+        },
+        {
+          "id": "w3",
+          "a": { "x": 12000, "y": 9000 },
+          "b": { "x": 0, "y": 9000 },
+          "thicknessMm": 250,
+          "heightMm": 2700
+        },
+        {
+          "id": "w4",
+          "a": { "x": 0, "y": 9000 },
+          "b": { "x": 0, "y": 0 },
+          "thicknessMm": 250,
+          "heightMm": 2700
+        },
+        {
+          "id": "w5",
+          "a": { "x": 4000, "y": 0 },
+          "b": { "x": 4000, "y": 4000 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        },
+        {
+          "id": "w6",
+          "a": { "x": 0, "y": 4000 },
+          "b": { "x": 8000, "y": 4000 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        },
+        {
+          "id": "w7",
+          "a": { "x": 8000, "y": 4000 },
+          "b": { "x": 8000, "y": 9000 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        },
+        {
+          "id": "w8",
+          "a": { "x": 4000, "y": 6000 },
+          "b": { "x": 8000, "y": 6000 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        }
+      ],
+      "openings": [
+        {
+          "id": "o1",
+          "wallId": "w1",
+          "type": "door",
+          "offsetMm": 6000,
+          "widthMm": 1000,
+          "heightMm": 2100,
+          "sillHeightMm": 0
+        },
+        {
+          "id": "o2",
+          "wallId": "w5",
+          "type": "door",
+          "offsetMm": 2000,
+          "widthMm": 900,
+          "heightMm": 2100,
+          "sillHeightMm": 0
+        },
+        {
+          "id": "o3",
+          "wallId": "w6",
+          "type": "door",
+          "offsetMm": 6000,
+          "widthMm": 900,
+          "heightMm": 2100,
+          "sillHeightMm": 0
+        },
+        {
+          "id": "o4",
+          "wallId": "w8",
+          "type": "door",
+          "offsetMm": 2000,
+          "widthMm": 900,
+          "heightMm": 2100,
+          "sillHeightMm": 0
+        },
+        {
+          "id": "o5",
+          "wallId": "w2",
+          "type": "window",
+          "offsetMm": 4500,
+          "widthMm": 1500,
+          "heightMm": 1200,
+          "sillHeightMm": 900
+        },
+        {
+          "id": "o6",
+          "wallId": "w3",
+          "type": "window",
+          "offsetMm": 6000,
+          "widthMm": 1800,
+          "heightMm": 1500,
+          "heightMm": 1200,
+          "sillHeightMm": 900
+        },
+        {
+          "id": "o7",
+          "wallId": "w4",
+          "type": "window",
+          "offsetMm": 2000,
+          "widthMm": 1200,
+          "heightMm": 1200,
+          "sillHeightMm": 900
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-01-05T10:00:00Z",
+  "updatedAt": "2026-01-05T10:00:00Z"
+}

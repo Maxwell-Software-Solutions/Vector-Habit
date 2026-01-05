@@ -1,0 +1,63 @@
+{
+  "id": "p1",
+  "name": "Simple Rectangular Room",
+  "units": "mm",
+  "levels": [
+    {
+      "id": "l1",
+      "name": "Ground Floor",
+      "walls": [
+        {
+          "id": "w1",
+          "a": { "x": 0, "y": 0 },
+          "b": { "x": 5000, "y": 0 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        },
+        {
+          "id": "w2",
+          "a": { "x": 5000, "y": 0 },
+          "b": { "x": 5000, "y": 4000 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        },
+        {
+          "id": "w3",
+          "a": { "x": 5000, "y": 4000 },
+          "b": { "x": 0, "y": 4000 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        },
+        {
+          "id": "w4",
+          "a": { "x": 0, "y": 4000 },
+          "b": { "x": 0, "y": 0 },
+          "thicknessMm": 200,
+          "heightMm": 2700
+        }
+      ],
+      "openings": [
+        {
+          "id": "o1",
+          "wallId": "w1",
+          "type": "door",
+          "offsetMm": 2500,
+          "widthMm": 900,
+          "heightMm": 2100,
+          "sillHeightMm": 0
+        },
+        {
+          "id": "o2",
+          "wallId": "w2",
+          "type": "window",
+          "offsetMm": 2000,
+          "widthMm": 1200,
+          "heightMm": 1200,
+          "sillHeightMm": 900
+        }
+      ]
+    }
+  ],
+  "createdAt": "2026-01-05T10:00:00Z",
+  "updatedAt": "2026-01-05T10:00:00Z"
+}
