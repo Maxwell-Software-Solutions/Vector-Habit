@@ -40,16 +40,34 @@ const MAX_ZOOM = 2.0;
 
 export function FloorPlanEditor({
   project: initialProject,
-  width = 1000,
-  height = 700,
+  width,
+  height,
   onProjectChange,
 }: FloorPlanEditorProps) {
   const stageRef = useRef<any>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [dimensions, setDimensions] = useState({ width: width || 1000, height: height || 700 });
   const [scale, setScale] = useState(0.1);
-  const [position, setPosition] = useState({ x: width / 2, y: height / 2 });
+  const [position, setPosition] = useState({ x: dimensions.width / 2, y: dimensions.height / 2 });
   const [isDragging, setIsDragging] = useState(false);
   const [hoveredWallId, setHoveredWallId] = useState<string | null>(null);
   const [cursorPosition, setCursorPosition] = useState<Point | null>(null);
+
+  // Handle responsive canvas size
+  useEffect(() => {
+    if (!width || !height) {
+      const updateSize = () => {
+        if (containerRef.current) {
+          const { clientWidth, clientHeight } = containerRef.current;
+          setDimensions({ width: clientWidth, height: clientHeight });
+          setPosition({ x: clientWidth / 2, y: clientHeight / 2 });
+        }
+      };
+      updateSize();
+      window.addEventListener('resize', updateSize);
+      return () => window.removeEventListener('resize', updateSize);
+    }
+  }, [width, height]);
 
   // Editor store
   const {
@@ -373,11 +391,11 @@ export function FloorPlanEditor({
   }
 
   return (
-    <div className="relative">
+    <div ref={containerRef} className="absolute inset-0 w-full h-full">
       <Stage
         ref={stageRef}
-        width={width}
-        height={height}
+        width={dimensions.width}
+        height={dimensions.height}
         scaleX={scale}
         scaleY={scale}
         x={position.x}
