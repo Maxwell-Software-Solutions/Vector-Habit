@@ -6,14 +6,15 @@
 
 'use client';
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useEditorStore } from '@/lib/store/editorStore';
+import { commandHistory, UpdateOpeningCommand, UpdateWallCommand } from '@/lib/commands';
 
 export function PropertiesPanel() {
-  const { project, selectedElement, selectElement } = useEditorStore();
+  const { project, selectedElement, selectElement, updateProject } = useEditorStore();
 
   const selectedData = useMemo(() => {
     if (!project || !selectedElement) return null;
@@ -87,24 +88,55 @@ export function PropertiesPanel() {
       <div className="space-y-3">
         {selectedData.type === 'wall' ? (
           <>
-            <PropertyRow label="ID" value={selectedData.id} />
-            <PropertyRow label="Start X" value={`${selectedData.startX} mm`} />
-            <PropertyRow label="Start Y" value={`${selectedData.startY} mm`} />
-            <PropertyRow label="End X" value={`${selectedData.endX} mm`} />
-            <PropertyRow label="End Y" value={`${selectedData.endY} mm`} />
-            <PropertyRow label="Thickness" value={`${selectedData.thickness} mm`} />
-            <PropertyRow label="Length" value={`${selectedData.length} mm`} />
+            <PropertyRow label="ID" value={selectedData.id} readOnly />
+            <PropertyRow label="Start X" value={`${selectedData.startX} mm`} readOnly />
+            <PropertyRow label="Start Y" value={`${selectedData.startY} mm`} readOnly />
+            <PropertyRow label="End X" value={`${selectedData.endX} mm`} readOnly />
+            <PropertyRow label="End Y" value={`${selectedData.endY} mm`} readOnly />
+            <EditablePropertyRow
+              label="Thickness"
+              value={selectedData.thickness}
+              unit="mm"
+              onSave={(value) => {
+                if (!project || !selectedElement) return;
+                const command = new UpdateWallCommand(
+                  selectedElement.id,
+                  { thicknessMm: value },
+                  project,
+                  selectedElement.levelIndex
+                );
+                commandHistory.execute(command);
+                updateProject((p) => ({ ...p }));
+              }}
+            />
+            <PropertyRow label="Length" value={`${selectedData.length} mm`} readOnly />
           </>
         ) : (
           <>
-            <PropertyRow label="ID" value={selectedData.id} />
+            <PropertyRow label="ID" value={selectedData.id} readOnly />
             <PropertyRow
               label="Type"
               value={selectedData.openingType === 'door' ? 'Door' : 'Window'}
+              readOnly
             />
-            <PropertyRow label="Parent Wall" value={selectedData.parentWallId} />
-            <PropertyRow label="Offset" value={`${selectedData.offset} mm`} />
-            <PropertyRow label="Width" value={`${selectedData.width} mm`} />
+            <PropertyRow label="Parent Wall" value={selectedData.parentWallId} readOnly />
+            <PropertyRow label="Offset" value={`${selectedData.offset} mm`} readOnly />
+            <EditablePropertyRow
+              label="Width"
+              value={selectedData.width}
+              unit="mm"
+              onSave={(value) => {
+                if (!project || !selectedElement) return;
+                const command = new UpdateOpeningCommand(
+                  selectedElement.id,
+                  { widthMm: value },
+                  project,
+                  selectedElement.levelIndex
+                );
+                commandHistory.execute(command);
+                updateProject((p) => ({ ...p }));
+              }}
+            />
           </>
         )}
       </div>
@@ -116,11 +148,70 @@ export function PropertiesPanel() {
   );
 }
 
-function PropertyRow({ label, value }: { label: string; value: string }) {
+function PropertyRow({ label, value, readOnly }: { label: string; value: string; readOnly?: boolean }) {
   return (
     <div className="flex justify-between items-center py-1">
       <span className="text-sm font-medium text-gray-700">{label}:</span>
       <span className="text-sm text-gray-900 font-mono">{value}</span>
+    </div>
+  );
+}
+
+function EditablePropertyRow({
+  label,
+  value,
+  unit,
+  onSave,
+}: {
+  label: string;
+  value: number;
+  unit: string;
+  onSave: (value: number) => void;
+}) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(value.toString());
+
+  const handleSave = () => {
+    const numValue = parseInt(editValue, 10);
+    if (!isNaN(numValue) && numValue > 0) {
+      onSave(numValue);
+      setIsEditing(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter') {
+      handleSave();
+    } else if (e.key === 'Escape') {
+      setEditValue(value.toString());
+      setIsEditing(false);
+    }
+  };
+
+  return (
+    <div className="flex justify-between items-center py-1">
+      <span className="text-sm font-medium text-gray-700">{label}:</span>
+      {isEditing ? (
+        <div className="flex items-center gap-1">
+          <input
+            type="number"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onBlur={handleSave}
+            autoFocus
+            className="w-20 px-2 py-1 text-sm border border-blue-300 rounded font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <span className="text-xs text-gray-500">{unit}</span>
+        </div>
+      ) : (
+        <button
+          onClick={() => setIsEditing(true)}
+          className="text-sm text-gray-900 font-mono hover:bg-gray-100 px-2 py-1 rounded transition-colors"
+        >
+          {value} {unit}
+        </button>
+      )}
     </div>
   );
 }

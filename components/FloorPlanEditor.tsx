@@ -22,8 +22,10 @@ import {
   AddOpeningCommand,
   RemoveWallCommand,
   RemoveOpeningCommand,
+  UpdateWallCommand,
 } from '@/lib/commands';
 import { snapToGrid, pointToLineDistance, canvasToWorld } from '@/lib/utils/geometry';
+import { detectRooms, formatArea } from '@/lib/utils/roomDetection';
 
 interface FloorPlanEditorProps {
   project: Project;
@@ -82,6 +84,9 @@ export function FloorPlanEditor({
     selectElement,
     setDrawingStartPoint,
     updateProject,
+    copySelected,
+    pasteFromClipboard,
+    duplicateSelected,
   } = useEditorStore();
 
   // Initialize project in store
@@ -114,6 +119,9 @@ export function FloorPlanEditor({
       };
     })
     .filter(Boolean);
+
+  // Detect rooms for labels
+  const rooms = walls.length > 0 ? detectRooms(walls) : [];
 
   // Zoom handler
   const handleWheel = useCallback(
@@ -353,6 +361,23 @@ export function FloorPlanEditor({
       else if (e.key === 'Escape') {
         setDrawingStartPoint(null);
       }
+      // Copy (Ctrl+C)
+      else if (e.ctrlKey && e.key === 'c' && selectedElement) {
+        e.preventDefault();
+        copySelected();
+      }
+      // Paste (Ctrl+V)
+      else if (e.ctrlKey && e.key === 'v') {
+        e.preventDefault();
+        pasteFromClipboard();
+        updateProject((p) => ({ ...p }));
+      }
+      // Duplicate (Ctrl+D)
+      else if (e.ctrlKey && e.key === 'd' && selectedElement) {
+        e.preventDefault();
+        duplicateSelected();
+        updateProject((p) => ({ ...p }));
+      }
       // Delete selected element
       else if ((e.key === 'Delete' || e.key === 'Backspace') && selectedElement) {
         e.preventDefault();
@@ -379,7 +404,16 @@ export function FloorPlanEditor({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedElement, project, updateProject, selectElement, setDrawingStartPoint]);
+  }, [
+    selectedElement,
+    project,
+    updateProject,
+    selectElement,
+    setDrawingStartPoint,
+    copySelected,
+    pasteFromClipboard,
+    duplicateSelected,
+  ]);
 
   // Early return check AFTER all hooks
   if (!project || !level) {
@@ -449,6 +483,82 @@ export function FloorPlanEditor({
           })}
         </Layer>
 
+        {/* Wall Endpoint Handles Layer */}
+        {currentTool === 'select' && selectedElement?.type === 'wall' && (
+          <Layer>
+            {walls.map((wall) => {
+              if (wall.id !== selectedElement.id) return null;
+
+              return (
+                <React.Fragment key={`handles-${wall.id}`}>
+                  {/* Start point handle */}
+                  <Circle
+                    x={wall.a.x}
+                    y={wall.a.y}
+                    radius={8 / scale}
+                    fill="#3b82f6"
+                    stroke="#1d4ed8"
+                    strokeWidth={2 / scale}
+                    draggable
+                    onDragMove={(e) => {
+                      const newX = e.target.x();
+                      const newY = e.target.y();
+                      e.target.x(newX);
+                      e.target.y(newY);
+                    }}
+                    onDragEnd={(e) => {
+                      if (!project) return;
+                      const newX = Math.round(e.target.x());
+                      const newY = Math.round(e.target.y());
+                      const snapped = snapToGrid({ x: newX, y: newY }, GRID_SIZE);
+                      
+                      const command = new UpdateWallCommand(
+                        wall.id,
+                        { a: snapped },
+                        project,
+                        0
+                      );
+                      commandHistory.execute(command);
+                      updateProject((p) => ({ ...p }));
+                    }}
+                  />
+                  {/* End point handle */}
+                  <Circle
+                    x={wall.b.x}
+                    y={wall.b.y}
+                    radius={8 / scale}
+                    fill="#3b82f6"
+                    stroke="#1d4ed8"
+                    strokeWidth={2 / scale}
+                    draggable
+                    onDragMove={(e) => {
+                      const newX = e.target.x();
+                      const newY = e.target.y();
+                      e.target.x(newX);
+                      e.target.y(newY);
+                    }}
+                    onDragEnd={(e) => {
+                      if (!project) return;
+                      const newX = Math.round(e.target.x());
+                      const newY = Math.round(e.target.y());
+                      const snapped = snapToGrid({ x: newX, y: newY }, GRID_SIZE);
+                      
+                      const command = new UpdateWallCommand(
+                        wall.id,
+                        { b: snapped },
+                        project,
+                        0
+                      );
+                      commandHistory.execute(command);
+                      updateProject((p) => ({ ...p }));
+                    }}
+                  />
+                </React.Fragment>
+              );
+            })}
+          </Layer>
+        )}
+
         {/* Openings Layer */}
         <Layer>
           {openingGeometries.map((item) => {
@@ -487,6 +597,38 @@ export function FloorPlanEditor({
           })}
         </Layer>
 
+        {/* Room Labels Layer */}
+        <Layer>
+          {rooms.map((room) => (
+            <React.Fragment key={room.id}>
+              <Text
+                x={room.center.x}
+                y={room.center.y - 15 / scale}
+                text={room.label}
+                fontSize={14 / scale}
+                fontFamily="Arial"
+                fill="#374151"
+                align="center"
+                offsetX={0}
+                width={100 / scale}
+                offsetY={7 / scale}
+              />
+              <Text
+                x={room.center.x}
+                y={room.center.y + 5 / scale}
+                text={formatArea(room.area)}
+                fontSize={12 / scale}
+                fontFamily="Arial"
+                fill="#6b7280"
+                align="center"
+                offsetX={0}
+                width={100 / scale}
+                offsetY={6 / scale}
+              />
+            </React.Fragment>
+          ))}
+        </Layer>
+
         {/* Drawing Preview Layer */}
         {currentTool === 'draw-wall' && drawingStartPoint && cursorPosition && (
           <Layer>
@@ -521,9 +663,14 @@ export function FloorPlanEditor({
           {(currentTool === 'add-door' || currentTool === 'add-window') && (
             <li>• Click wall: Add opening</li>
           )}
-          <li>• Ctrl+Z: Undo</li>
-          <li>• Ctrl+Shift+Z: Redo</li>
-          {selectedElement && <li>• Delete/Backspace: Remove</li>}
+          <li>• Ctrl+Z: Undo | Ctrl+Shift+Z: Redo</li>
+          {selectedElement && (
+            <>
+              <li>• Ctrl+C: Copy | Ctrl+V: Paste</li>
+              <li>• Ctrl+D: Duplicate</li>
+              <li>• Delete: Remove</li>
+            </>
+          )}
         </ul>
       </div>
 

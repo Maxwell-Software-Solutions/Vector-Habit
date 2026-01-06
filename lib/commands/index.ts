@@ -11,3 +11,6 @@ export { AddWallCommand } from './AddWallCommand';
 export { RemoveWallCommand } from './RemoveWallCommand';
 export { AddOpeningCommand } from './AddOpeningCommand';
 export { RemoveOpeningCommand } from './RemoveOpeningCommand';
+export { MoveOpeningCommand } from './MoveOpeningCommand';
+export { UpdateOpeningCommand } from './UpdateOpeningCommand';
+export { UpdateWallCommand } from './UpdateWallCommand';

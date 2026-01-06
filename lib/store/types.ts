@@ -57,6 +57,9 @@ export interface EditorState {
 
   // Opening type for next placement
   nextOpeningType: 'door' | 'window';
+
+  // Clipboard for copy/paste
+  clipboard: { type: 'wall'; data: Wall } | { type: 'opening'; data: Opening } | null;
 }
 
 /**
@@ -81,6 +84,11 @@ export interface EditorActions {
   setWallThickness: (thickness: number) => void;
   setOpeningWidth: (width: number) => void;
   setNextOpeningType: (type: 'door' | 'window') => void;
+
+  // Clipboard
+  copySelected: () => void;
+  pasteFromClipboard: () => void;
+  duplicateSelected: () => void;
 
   // Reset
   reset: () => void;
