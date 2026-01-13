@@ -154,7 +154,11 @@ export const useEditorStore = create<EditorStore>((set) => ({
           level.walls.push(newWall);
           return {
             project: { ...state.project },
-            selectedElement: { type: 'wall', id: newWall.id, levelIndex: state.selectedElement.levelIndex },
+            selectedElement: {
+              type: 'wall',
+              id: newWall.id,
+              levelIndex: state.selectedElement.levelIndex,
+            },
           };
         }
       } else if (state.selectedElement.type === 'opening') {
@@ -167,7 +171,11 @@ export const useEditorStore = create<EditorStore>((set) => ({
           level.openings.push(newOpening);
           return {
             project: { ...state.project },
-            selectedElement: { type: 'opening', id: newOpening.id, levelIndex: state.selectedElement.levelIndex },
+            selectedElement: {
+              type: 'opening',
+              id: newOpening.id,
+              levelIndex: state.selectedElement.levelIndex,
+            },
           };
         }
       }

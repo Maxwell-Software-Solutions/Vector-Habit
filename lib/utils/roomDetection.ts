@@ -1,6 +1,6 @@
 /**
  * Room Detection Utilities
- * 
+ *
  * Functions to detect and calculate room properties from walls.
  */
 
@@ -53,7 +53,7 @@ export function calculatePolygonArea(points: Point[]): number {
 
 /**
  * Detect simple rectangular rooms from walls
- * This is a simplified version - a full implementation would need 
+ * This is a simplified version - a full implementation would need
  * more sophisticated polygon detection
  */
 export function detectRooms(walls: Wall[]): Room[] {

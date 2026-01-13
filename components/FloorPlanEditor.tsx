@@ -511,13 +511,8 @@ export function FloorPlanEditor({
                       const newX = Math.round(e.target.x());
                       const newY = Math.round(e.target.y());
                       const snapped = snapToGrid({ x: newX, y: newY }, GRID_SIZE);
-                      
-                      const command = new UpdateWallCommand(
-                        wall.id,
-                        { a: snapped },
-                        project,
-                        0
-                      );
+
+                      const command = new UpdateWallCommand(wall.id, { a: snapped }, project, 0);
                       commandHistory.execute(command);
                       updateProject((p) => ({ ...p }));
                     }}
@@ -542,13 +537,8 @@ export function FloorPlanEditor({
                       const newX = Math.round(e.target.x());
                       const newY = Math.round(e.target.y());
                       const snapped = snapToGrid({ x: newX, y: newY }, GRID_SIZE);
-                      
-                      const command = new UpdateWallCommand(
-                        wall.id,
-                        { b: snapped },
-                        project,
-                        0
-                      );
+
+                      const command = new UpdateWallCommand(wall.id, { b: snapped }, project, 0);
                       commandHistory.execute(command);
                       updateProject((p) => ({ ...p }));
                     }}

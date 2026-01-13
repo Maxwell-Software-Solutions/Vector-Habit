@@ -1,6 +1,6 @@
 /**
  * UpdateOpeningCommand
- * 
+ *
  * Command to update opening properties (width, type, etc.)
  */
 

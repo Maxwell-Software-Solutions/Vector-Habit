@@ -1,6 +1,6 @@
 /**
  * UpdateWallCommand
- * 
+ *
  * Command to update wall properties (endpoints, thickness, etc.)
  */
 
@@ -14,12 +14,7 @@ export class UpdateWallCommand extends BaseCommand {
   private oldProperties: Partial<Wall>;
   private newProperties: Partial<Wall>;
 
-  constructor(
-    wallId: string,
-    newProperties: Partial<Wall>,
-    project: Project,
-    levelIndex: number
-  ) {
+  constructor(wallId: string, newProperties: Partial<Wall>, project: Project, levelIndex: number) {
     super();
     this.wallId = wallId;
     this.newProperties = newProperties;

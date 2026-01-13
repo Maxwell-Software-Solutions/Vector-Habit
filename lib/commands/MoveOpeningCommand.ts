@@ -1,6 +1,6 @@
 /**
  * MoveOpeningCommand
- * 
+ *
  * Command to move an opening along its parent wall by changing its offset.
  */
 
@@ -14,12 +14,7 @@ export class MoveOpeningCommand extends BaseCommand {
   private oldOffset: number;
   private newOffset: number;
 
-  constructor(
-    openingId: string,
-    newOffset: number,
-    project: Project,
-    levelIndex: number
-  ) {
+  constructor(openingId: string, newOffset: number, project: Project, levelIndex: number) {
     super();
     this.openingId = openingId;
     this.newOffset = newOffset;

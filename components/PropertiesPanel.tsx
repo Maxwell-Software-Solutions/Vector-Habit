@@ -148,7 +148,15 @@ export function PropertiesPanel() {
   );
 }
 
-function PropertyRow({ label, value, readOnly }: { label: string; value: string; readOnly?: boolean }) {
+function PropertyRow({
+  label,
+  value,
+  readOnly,
+}: {
+  label: string;
+  value: string;
+  readOnly?: boolean;
+}) {
   return (
     <div className="flex justify-between items-center py-1">
       <span className="text-sm font-medium text-gray-700">{label}:</span>
